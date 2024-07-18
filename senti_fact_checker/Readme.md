@@ -12,3 +12,23 @@ For more details please read further:
 [VaderSentiment](https://pypi.org/project/vaderSentiment/)
 [NLTK](https://www.nltk.org/nltk_data/)
 [OpenAI](https://platform.openai.com/) *(in future iterations)*
+
+Screenshots of the project are provided in the screenshots folder.
+## Screenshots
+
+Here are some screenshots of the project in action:
+
+1. **Sentiment Analysis Output**
+   ![Sentiment Analysis Output](sentiment.png)
+
+2. **User Data Display**
+   ![User Data Display](userdata.png)
+
+3. **Influencer Data Display**
+   ![Influencer Data Display](posts.png)
+
+4. **Fact Checking with Tavily**
+   ![Fact Checking with Tavily](results.png)
+
+5. **Charts and Graphs**
+   ![Visualizations I](wordcloud.png)
