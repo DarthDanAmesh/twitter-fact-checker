@@ -105,7 +105,7 @@ def print_all_user_posts(data, screen_name):
     print("\nAll posts by user:", screen_name)
     user_posts = data[data['user'].apply(lambda x: x['screen_name'] == screen_name)]
 
-    all_texts = []
+    sentiment_counts = {"Positive": 0, "Negative": 0, "Neutral": 0}
 
     for index, row in user_posts.iterrows():
         try:
@@ -121,12 +121,18 @@ def print_all_user_posts(data, screen_name):
             # Categorize the sentiment
             sentiment = "Positive" if sentiment_scores['compound'] >= 0.05 else "Negative" if sentiment_scores['compound'] <= -0.05 else "Neutral"
             print("Sentiment category:", sentiment)
+            sentiment_counts[sentiment] += 1
             print("\n")
             
         except KeyError as e:
             print(f"Error processing user post data: {e}")
 
-    return all_texts
+    # Plot the sentiment counts
+    plt.bar(sentiment_counts.keys(), sentiment_counts.values())
+    plt.xlabel('Sentiment')
+    plt.ylabel('Count')
+    plt.title(f'Sentiment Analysis for all posts by {screen_name}')
+    plt.show()
 
 def search_mentions(data, screen_name):
     # Initialize the VADER sentiment analyzer

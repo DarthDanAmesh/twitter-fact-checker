@@ -32,3 +32,4 @@ Here are some screenshots of the project in action:
 
 5. **Charts and Graphs**
    ![Visualizations I](wordcloud.png)
+   ![Visualizations II](bargraphs.png)
