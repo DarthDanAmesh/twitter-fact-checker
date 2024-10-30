@@ -7,6 +7,9 @@ from pydantic import BaseModel
 from typing import List, Optional
 import pprint
 from ollama import AsyncClient
+from fastapi.staticfiles import StaticFiles
+
+#Local dev usage: fastapi dev chat.py
 
 # Initialize the Llama model locally
 llm = AsyncClient()
@@ -21,91 +24,83 @@ class SimplaText(BaseModel):
 summaries = []
 clients = set()
 
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
 html = """<!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Chat</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f2f5;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        #chat-container {
-            background: white;
-            width: 400px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        #chat-header {
-            background-color: #007bff;
-            color: white;
-            padding: 15px;
-            text-align: center;
-            font-size: 1.2em;
-        }
-        #messages {
-            list-style: none;
-            padding: 15px;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-        #messages li {
-            margin: 10px 0;
-            padding: 10px;
-            border-radius: 5px;
-            background-color: #f1f1f1;
-        }
-        #message-form {
-            display: flex;
-            border-top: 1px solid #ddd;
-        }
-        #messageText {
-            border: none;
-            padding: 15px;
-            flex: 1;
-        }
-        #sendButton {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 15px;
-            cursor: pointer;
-        }
-    </style>
+    <title>Chattie</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+    <!-- Credit: Scaler https://www.scaler.com/topics/chat-interface-project-css/ --> 
+    <!-- Import this CDN to use icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css" />
 </head>
 <body>
-    <div id="chat-container">
-        <div id="chat-header">WebSocket Chat</div>
-        <ul id='messages'></ul>
-        <form id="message-form" action="" onsubmit="sendMessage(event)">
-            <input type="text" id="messageText" autocomplete="off" placeholder="Type your message here..."/>
-            <button id="sendButton">Send</button>
-        </form>
+    <!-- Main container -->
+    <div class="container">
+        <!-- msg-header section starts -->
+        <div class="msg-header">
+            <div class="container1">
+                <img src="http://images6.fanpop.com/image/photos/36700000/Game-of-Thrones-image-game-of-thrones-36704090-100-100.png" class="msgimg" />
+                <div class="active">
+                    <p>Chattie</p>
+                </div>
+            </div>
+        </div>
+        <!-- msg-header section ends -->
+        <!-- Chat inbox  -->
+        <div class="chat-page">
+            <div class="msg-inbox">
+                <div class="chats">
+                    <!-- Message container -->
+                    <div class="msg-page" id="messages">
+                        <!-- Dynamic messages will be added here -->
+                    </div>
+                </div>
+                <!-- msg-bottom section -->
+                <div class="msg-bottom">
+                    <div class="input-group">
+                        <input type="text" id="messageText" class="form-control" placeholder="Write message..." />
+                        <span class="input-group-text send-icon" onclick="sendMessage(event)">
+                            <i class="bi bi-send"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <script>
         var ws = new WebSocket("ws://localhost:8000/ws");
         ws.onmessage = function(event) {
             var messages = document.getElementById('messages');
-            var message = document.createElement('li');
-            var content = document.createTextNode(event.data);
+            var message = document.createElement('div');
+            message.classList.add('received-chats'); // Adjust class as necessary for styling
+            var content = document.createElement('p');
+            content.textContent = event.data;
             message.appendChild(content);
             messages.appendChild(message);
+            messages.scrollTop = messages.scrollHeight;  // Scroll to the bottom
         };
         function sendMessage(event) {
             var input = document.getElementById("messageText");
             ws.send(input.value);
+            // Display the sent message
+            var messages = document.getElementById('messages');
+            var message = document.createElement('div');
+            message.classList.add('outgoing-chats'); // Adjust class as necessary for styling
+            var content = document.createElement('p');
+            content.textContent = input.value;
+            message.appendChild(content);
+            messages.appendChild(message);
+            messages.scrollTop = messages.scrollHeight;  // Scroll to the bottom
             input.value = '';
             event.preventDefault();
         }
     </script>
 </body>
-</html>"""
+</html>
+
+"""
 
 @app.get("/")
 async def get():
@@ -118,7 +113,7 @@ async def websocket_endpoint(websocket: WebSocket):
     while True:
         data = await websocket.receive_text()
         summary = await process_summary(data)
-        await websocket.send_text(f"Summary: {summary}")
+        await websocket.send_text(f"Chattie: {summary}")
 
 async def process_summary(input_text: str) -> str:
     message = {
