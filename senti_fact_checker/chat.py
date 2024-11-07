@@ -8,6 +8,7 @@ from typing import List, Optional
 import pprint
 from ollama import AsyncClient
 from fastapi.staticfiles import StaticFiles
+import datetime
 
 #Local dev usage: fastapi dev chat.py
 
@@ -64,6 +65,11 @@ html = """<!DOCTYPE html>
                         <span class="input-group-text send-icon" onclick="sendMessage(event)">
                             <i class="bi bi-send"></i>
                         </span>
+                        <span class="input-group-text send-icon">
+                        <a href="#" download="history.txt">
+                            <i class="bi bi-download"></i>
+                        </a>
+                        </span>
                     </div>
                 </div>
             </div>
@@ -110,10 +116,20 @@ async def get():
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     clients.add(websocket)
+    conversation = []
+
     while True:
         data = await websocket.receive_text()
         summary = await process_summary(data)
+        chat_time = datetime.datetime.now()
+        # persisting the chat
+        conversation.append((chat_time.strftime('%B %m, %Y %I:%M %p'), data, summary))
+
         await websocket.send_text(f"Chattie: {summary}")
+
+        with open("history.txt", 'a') as f:
+            print(conversation, end="", file=f)
+
 
 async def process_summary(input_text: str) -> str:
     message = {
