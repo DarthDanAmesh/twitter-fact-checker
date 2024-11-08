@@ -1,6 +1,6 @@
 import asyncio
 from fastapi import FastAPI, WebSocket, HTTPException
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.requests import Request
 from dotenv import dotenv_values
 from pydantic import BaseModel
@@ -66,7 +66,7 @@ html = """<!DOCTYPE html>
                             <i class="bi bi-send"></i>
                         </span>
                         <span class="input-group-text send-icon">
-                        <a href="#" download="history.txt">
+                        <a href="/download-chat/" download>
                             <i class="bi bi-download"></i>
                         </a>
                         </span>
@@ -111,6 +111,11 @@ html = """<!DOCTYPE html>
 @app.get("/")
 async def get():
     return HTMLResponse(html)
+
+@app.get("/download-chat/", response_class=FileResponse)
+async def download_file():
+    file = "history.txt"
+    return file
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
